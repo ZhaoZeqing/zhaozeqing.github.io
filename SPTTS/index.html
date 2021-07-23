@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SPTTS</title>
+	<link rel="stylesheet" href="./css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+	<div class="py-5 text-center" id="title-containter">
+		<h1 class="display-5 fw-bold fs-2">
+			SPTTS: Parallel Speech Synthesis without Extra Aligner Model
+		</h1>
+		<div class="pt-4 lead fs-5">
+			<p>
+				Zeqing Zhao*, Xi Chen*, Hui Liu, Xuyang Wang, Lin Yang, Junjie Wang
+			</p>
+			<p>AI Lab, Lenovo Research, Beijing, China</p>
+			<p><small>* Equal contribution</small></p>
+		</div>
+	</div>
+
+	<div class="py-5" id="wrapper">
+
+		<!--=============================Abstract=============================-->
+
+		<h2 class="pb-3 py-6 fs-3 fw-bold border-bottom">
+			Abstract
+		</h2>
+		<p class="py-3">
+			In this work, we develop a novel non-autoregressive TTS model to predict all mel-spectrogram frames in parallel. Different from the previous non-autoregressive TTS methods, which typically require an external aligner implemented by an attention-based autoregressive model, our model can be optimized jointly without sophisticated external aligners. Motivated by the CTC-based speech recognition, which is a simple and effective manner to achieve the frame-level forced-alignment between the speech and text, our main idea is to consider the aligner learning of TTS as a CTC-based speech recognition like task. Specifically, our model learns the alignment generator by adopting the CTC-loss, to provide supervision for the duration predictor learning on the fly. In this way, we are able to learn a one-stage TTS system by optimizing the aligner with the feed forward transformer jointly. In inference phase, the aligner is removed and the duration predictor is used to predict duration sequence for synthesizing speech. To demonstrate our method, we conduct extensive experiments on a open-source Chinese standard Mandarin speech <a href="https://www.data-baker.com/open_source.html#/data/index/source" target="_blank">dataset</a>. The results show that our method achieves competitive performance compared with counterpart models (FastSpeech: a well-known non-autoregressive with extra aligner) in terms of the synthesized speech quality and robustness.
+		</p>
+
+		<!--=============================Audio Samples=============================-->
+
+		<h2 class="pb-3 py-6 fs-3 fw-bold border-bottom">Audio Samples</h2>
+		<p class="py-3">All of the audio samples use Multiband-MelGAN (MB-MelGAN) as vocoder.</p>
+
+		<!--=============Audio Quality=============-->
+
+		<h3 class="py-3 fs-4 fw-bold">Audio Quality</h3>
+		<div class="pt-3 row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					吴云宝奶奶挑选枇杷。
+				</p>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT</p>
+				<audio controls="controls" src="wavs/GT_trim/400015.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT(MB-MelGAN)</p>
+				<audio controls="controls" src="wavs/GT_MB/400015.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Tacotron2</p>
+				<audio controls="controls" src="wavs/Tacotron2/400015.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Fastspeech</p>
+				<audio controls="controls" src="wavs/Fastspeech/400015.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">AlignTTS</p>
+				<audio controls="controls" src="wavs/AlignTTS/400015.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GlowTTS</p>
+				<audio controls="controls" src="wavs/GlowTTS/400015.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/400015.wav"></audio>
+			</div>
+		</div>
+
+		<div class="pt-5 row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					鼓起的兴奋一下子消散在无垠夜空里。
+				</p>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT</p>
+				<audio controls="controls" src="wavs/GT_trim/401085.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT(MB-MelGAN)</p>
+				<audio controls="controls" src="wavs/GT_MB/401085.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Tacotron2</p>
+				<audio controls="controls" src="wavs/Tacotron2/401085.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Fastspeech</p>
+				<audio controls="controls" src="wavs/Fastspeech/401085.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">AlignTTS</p>
+				<audio controls="controls" src="wavs/AlignTTS/401085.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GlowTTS</p>
+				<audio controls="controls" src="wavs/GlowTTS/401085.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/401085.wav"></audio>
+			</div>
+		</div>
+
+		<div class="pt-5 row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					但是丁可儿一直沉默，对出走的事情只字不提。
+				</p>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT</p>
+				<audio controls="controls" src="wavs/GT_trim/404852.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT(MB-MelGAN)</p>
+				<audio controls="controls" src="wavs/GT_MB/404852.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Tacotron2</p>
+				<audio controls="controls" src="wavs/Tacotron2/404852.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Fastspeech</p>
+				<audio controls="controls" src="wavs/Fastspeech/404852.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">AlignTTS</p>
+				<audio controls="controls" src="wavs/AlignTTS/404852.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GlowTTS</p>
+				<audio controls="controls" src="wavs/GlowTTS/404852.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/404852.wav"></audio>
+			</div>
+		</div>
+
+		<div class="pt-5 row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					成功是一种了不起的除臭剂。
+				</p>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT</p>
+				<audio controls="controls" src="wavs/GT_trim/407488.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT(MB-MelGAN)</p>
+				<audio controls="controls" src="wavs/GT_MB/407488.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Tacotron2</p>
+				<audio controls="controls" src="wavs/Tacotron2/407488.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Fastspeech</p>
+				<audio controls="controls" src="wavs/Fastspeech/407488.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">AlignTTS</p>
+				<audio controls="controls" src="wavs/AlignTTS/407488.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GlowTTS</p>
+				<audio controls="controls" src="wavs/GlowTTS/407488.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/407488.wav"></audio>
+			</div>
+		</div>
+
+		<div class="pt-5 row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					我一切都好，您大可不必操心。
+				</p>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT</p>
+				<audio controls="controls" src="wavs/GT_trim/409446.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GT(MB-MelGAN)</p>
+				<audio controls="controls" src="wavs/GT_MB/409446.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Tacotron2</p>
+				<audio controls="controls" src="wavs/Tacotron2/409446.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">Fastspeech</p>
+				<audio controls="controls" src="wavs/Fastspeech/409446.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">AlignTTS</p>
+				<audio controls="controls" src="wavs/AlignTTS/409446.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">GlowTTS</p>
+				<audio controls="controls" src="wavs/GlowTTS/409446.wav"></audio>
+			</div>
+			<div class="col-3">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/409446.wav"></audio>
+			</div>
+		</div>
+
+		<!--=============Parallel vs Seperate=============-->
+
+		<h3 class="pt-5 pb-3 fs-4 fw-bold">Parallel vs Seperate</h3>
+
+		<div class="pt-5 row fw-bold text-center">
+			<div class="col-4">
+				<p class="lead fs-5 fst-italic">
+					考生有压力，状元也不例外。
+				</p>
+			</div>
+			<div class="col-4">
+				<p class="lead fs-5 fst-italic">
+					驴子越跑越快，越跑越疯狂。
+				</p>
+			</div>
+			<div class="col-4">
+				<p class="lead fs-5 fst-italic">
+					难道不是围巾、围裙和围嘴吗？
+				</p>
+			</div>
+
+			<div class="col-2">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/403007.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS-Seperate</p>
+				<audio controls="controls" src="wavs/SPTTS_Seperate/403007.wav"></audio>
+			</div>
+
+			<div class="col-2">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/400036.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS-Seperate</p>
+				<audio controls="controls" src="wavs/SPTTS_Seperate/400036.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/400519.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS-Seperate</p>
+				<audio controls="controls" src="wavs/SPTTS_Seperate/400519.wav"></audio>
+			</div>
+		</div>
+
+		<div class="pt-5 row fw-bold text-center">
+			<div class="col-4">
+				<p class="lead fs-5 fst-italic">
+					鼓起的兴奋一下子消散在无垠夜空里。
+				</p>
+			</div>
+			<div class="col-4">
+				<p class="lead fs-5 fst-italic">
+					因为物价仍在缓慢上升，而且还没有出现拐点。
+				</p>
+			</div>
+			<div class="col-4">
+				<p class="lead fs-5 fst-italic">
+					积极开辟办证绿色通道。
+				</p>
+			</div>
+
+			<div class="col-2">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/401085.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS-Seperate</p>
+				<audio controls="controls" src="wavs/SPTTS_Seperate/401085.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/405157.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS-Seperate</p>
+				<audio controls="controls" src="wavs/SPTTS_Seperate/405157.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS</p>
+				<audio controls="controls" src="wavs/SPTTS/404752.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS-Seperate</p>
+				<audio controls="controls" src="wavs/SPTTS_Seperate/404752.wav"></audio>
+			</div>
+		</div>
+
+		<!--=============Voice Speed Control=============-->
+
+		<h3 class="pt-5 pb-3 fs-4 fw-bold">Voice Speed Control</h3>
+		<p class="py-3"><b>ratio</b> represents the coefficient multiplied by the phone duration sequences.</p>
+		<div class="row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					邓小平与撒切尔会晤。
+				</p>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.8</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400004_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.9</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400004_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.0</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400004_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.1</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400004_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.2</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400004_1.2.wav"></audio>
+			</div>
+		</div>
+		<div class="row row-cols-3 fw-bold text-center">
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.8</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400004_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.9</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400004_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.0</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400004_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.1</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400004_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.2</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400004_1.2.wav"></audio>
+			</div>
+		</div>
+
+		<div class="pt-5 row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					成荫挑选我演赵玉敏。
+				</p>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.8</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400034_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.9</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400034_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.0</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400034_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.1</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400034_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.2</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400034_1.2.wav"></audio>
+			</div>
+		</div>
+		<div class="row row-cols-3 fw-bold text-center">
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.8</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400034_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.9</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400034_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.0</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400034_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.1</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400034_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.2</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400034_1.2.wav"></audio>
+			</div>
+		</div>
+
+		<div class="pt-5 row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					小文杰枯瘦如柴。
+				</p>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.8</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400097_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.9</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400097_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.0</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400097_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.1</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400097_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.2</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/400097_1.2.wav"></audio>
+			</div>
+		</div>
+		<div class="row row-cols-3 fw-bold text-center">
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.8</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400097_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.9</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400097_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.0</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400097_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.1</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400097_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.2</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/400097_1.2.wav"></audio>
+			</div>
+		</div>
+
+		<div class="pt-5 row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					这是北美地区有史以来最大数额的彩票总奖金。
+				</p>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.8</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/402305_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.9</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/402305_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.0</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/402305_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.1</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/402305_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.2</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/402305_1.2.wav"></audio>
+			</div>
+		</div>
+		<div class="row row-cols-3 fw-bold text-center">
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.8</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/402305_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.9</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/402305_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.0</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/402305_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.1</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/402305_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.2</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/402305_1.2.wav"></audio>
+			</div>
+		</div>
+
+		<div class="pt-5 row row-cols-3 fw-bold text-center">
+			<div class="col-12">
+				<p class="text-start lead fs-5 fst-italic">
+					村庄历史最早记载见于一四六一年。
+				</p>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.8</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/403791_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=0.9</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/403791_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.0</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/403791_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.1</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/403791_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">SPTTS ratio=1.2</p>
+				<audio controls="controls" src="wavs/SPTTS_Speed/403791_1.2.wav"></audio>
+			</div>
+		</div>
+		<div class="row row-cols-3 fw-bold text-center">
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.8</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/403791_0.8.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=0.9</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/403791_0.9.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.0</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/403791_1.0.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.1</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/403791_1.1.wav"></audio>
+			</div>
+			<div class="col-2">
+				<p class="pt-3">Fastspeech ratio=1.2</p>
+				<audio controls="controls" src="wavs/Fastspeech_Speed/403791_1.2.wav"></audio>
+			</div>
+		</div>
+
+	</div>
+</body>
+</html>
