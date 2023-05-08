@@ -1,0 +1,23 @@
+#wrapper{
+	padding: 20px 50px;
+}
+#title-containter{
+	background: #0dcaf0;
+	color: #fff;
+}
+audio{
+	width: 210px;
+}
+.greed-text{
+	color: #0dcaf0;
+}
+.yellow-text{
+	color: #ffca2c;
+}
+th, td{
+	text-align: center;
+	vertical-align: middle;
+}
+.p-special{
+	margin: 0;
+}
